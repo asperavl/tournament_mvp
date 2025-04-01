@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
+from django.utils.text import slugify
 
 class Tournament(models.Model):
     name = models.CharField(max_length=255)
