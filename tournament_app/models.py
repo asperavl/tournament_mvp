@@ -1,16 +1,9 @@
 from django.db import models
-from django.db.models.signals import post_delete,pre_delete
-from django.dispatch import receiver
-
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
-
-
-
 
 class Tournament(models.Model):
     name = models.CharField(max_length=255)
-    description = models.TextField(null=True, blank=True)
-    max_teams = 4  # Set a reasonable default limit
     status = models.CharField(
         default='available',
         max_length=10,
@@ -20,51 +13,71 @@ class Tournament(models.Model):
             ('completed', 'Completed')
         ]
     )
-    num_teams_registered = models.IntegerField(default=0)  # Track how many teams have registered
-    users = models.ManyToManyField(User, related_name='registered_tournaments', blank=True,null=True)
+    num_teams_registered = models.IntegerField(default=0)
+    slug = models.SlugField(max_length=255, unique=True, blank=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    @property
+    def is_full(self):
+        return self.num_teams_registered >= 4  # Hardcoded 4-team limit
+
     def __str__(self):
         return self.name
 
-@receiver(pre_delete, sender=Tournament)
-def remove_users_from_tournament(sender, instance, **kwargs):
-    # Disassociate all users from the tournament
-    instance.users.clear()
-
 class Team(models.Model):
     name = models.CharField(max_length=255)
-    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
-    players = models.CharField(max_length=1024,null=True, blank=True)
+    tournament = models.ForeignKey('Tournament', on_delete=models.CASCADE)
+    registered_by = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        related_name='registered_teams'  # Important for reverse lookups
+    )
+    class Meta:
+        unique_together = [('tournament', 'registered_by')]  # 1 team per user per tournament
 
     def save(self, *args, **kwargs):
-        # Check if it's a new team (not updating an existing one)
-        is_new = self._state.adding
-
+        is_new = not self.pk  # Check if this is a new team
+        
         super().save(*args, **kwargs)  # Save the team first
 
-        if is_new:  # If it's a new registration, update num_teams_registered
+        if is_new:
+            # Update tournament counters
             self.tournament.num_teams_registered += 1
+            
+            # Automatically start tournament when 4 teams register
+            if self.tournament.num_teams_registered >= 4:
+                self.tournament.status = 'ongoing'
+            
             self.tournament.save()
 
-
     def __str__(self):
-        return f"{self.name} - {self.tournament.name}"
-    
-
-@receiver(post_delete, sender=Team)
-def update_num_teams_registered(sender, instance, **kwargs):
-    tournament = instance.tournament
-    tournament.num_teams_registered -= 1
-    tournament.save()
-
+        return f"{self.name} ({self.tournament})"
 
 class Match(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
-    team1 = models.ForeignKey(Team, related_name='team1', on_delete=models.CASCADE)
-    team2 = models.ForeignKey(Team, related_name='team2', on_delete=models.CASCADE)
-    score1 = models.IntegerField(null=True, blank=True)
-    score2 = models.IntegerField(null=True, blank=True)
-    winner = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True, related_name="won_matches")
-    round_number = models.IntegerField(default=1)
+    team1 = models.ForeignKey(Team, related_name='team1_matches', on_delete=models.CASCADE)
+    team2 = models.ForeignKey(Team, related_name='team2_matches', on_delete=models.CASCADE)
+    team1_score = models.PositiveIntegerField(null=True, blank=True)
+    team2_score = models.PositiveIntegerField(null=True, blank=True)
+    winner = models.ForeignKey(Team, null=True, blank=True, on_delete=models.SET_NULL)
+    round_number = models.PositiveIntegerField(default=1)  # 1=Semifinals, 2=Finals
+
+    def clean(self):
+        # Basic validation - teams must be from same tournament
+        if self.team1.tournament != self.team2.tournament:
+            raise ValidationError("Teams must be from the same tournament")
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        
+        # Mark tournament as completed if final has a winner
+        if self.round_number == 2 and self.winner:
+            self.tournament.status = 'completed'
+            self.tournament.save()
 
     def __str__(self):
-        return f"{self.team1.name} vs {self.team2.name}"
+        return f"{self.team1} vs {self.team2} (Round {self.round_number})"

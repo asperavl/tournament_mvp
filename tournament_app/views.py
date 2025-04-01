@@ -2,10 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Tournament, Team, Match
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, authenticate
-from django.contrib.auth.forms import AuthenticationForm,UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from .forms import TeamRegistrationForm
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import models;
 
 def index(request):
     tournaments = Tournament.objects.all()
@@ -22,65 +22,76 @@ def register(request):
         form = UserCreationForm()
     return render(request, 'register.html', {'form': form})
 
-
 @login_required
-def register_team(request, tournament_id):
-    # Fetch the tournament based on its ID
-    tournament = Tournament.objects.get(id=tournament_id)
+def register_team(request, tournament_slug):
+    tournament = get_object_or_404(Tournament, slug=tournament_slug)
 
-    # Check if the tournament is available for registration
+    # Block registration if tournament isn't available
     if tournament.status != 'available':
-        return redirect('dashboard')  # Redirect if the tournament is not available
+        messages.error(request, "This tournament has already started")
+        return redirect('dashboard')
 
-    # Check if the tournament has reached its max teams
-    if tournament.num_teams_registered >= tournament.max_teams:
-        # Display an error message if the tournament is full
-        messages.error(request, f"This tournament has already reached the maximum number of {tournament.max_teams} teams.")
+    # Block if user already registered
+    if Team.objects.filter(tournament=tournament, registered_by=request.user).exists():
+        messages.error(request, "You can only register one team per tournament")
+        return redirect('dashboard')
+
+    # Block if tournament is full
+    if tournament.num_teams_registered >= 4:
+        messages.error(request, "Tournament is full (4 teams maximum)")
         return redirect('dashboard')
 
     if request.method == 'POST':
         form = TeamRegistrationForm(request.POST)
         if form.is_valid():
-            # Save the new team but don't commit yet
             team = form.save(commit=False)
-            tournament.users.add(request.user)  # Add user to tournament's users field
-            team.tournament = tournament  # Associate the team with the tournament
-            team.user = request.user  # Assign the logged-in user to the team
-            team.save()
-
-            # Increment the number of teams registered for the tournament
-            tournament.num_teams_registered += 1
-            tournament.save()
-
-            return redirect('dashboard')  # Redirect to dashboard after successful registration
+            team.tournament = tournament
+            team.registered_by = request.user
+            team.save()  # This triggers the status update in Team.save()
+            
+            messages.success(request, f"Team '{team.name}' registered successfully!")
+            return redirect('dashboard')
     else:
         form = TeamRegistrationForm()
 
-    return render(request, 'register_team.html', {'form': form, 'tournament': tournament})
-
-
-@login_required
-def dashboard(request):
-    user = request.user
-    # Get tournaments the user has registered for
-    tournaments = Tournament.objects.filter(users=user)
-
-    # Get all available tournaments
-    available_tournaments = Tournament.objects.filter(status='available')
-
-    return render(request, 'dashboard.html', {
-        'user': user,
-        'tournaments': tournaments,  # Registered tournaments
-        'available_tournaments': available_tournaments,  # Available tournaments
+    return render(request, 'register_team.html', {
+        'form': form,
+        'tournament': tournament,
+        'spots_remaining': 4 - tournament.num_teams_registered
     })
 
 @login_required
-def view_tournament_bracket(request, tournament_id):
-    tournament = get_object_or_404(Tournament, id=tournament_id)
+def dashboard(request):
+    # Get tournaments where user has teams with count annotation
+    registered_tournaments = Tournament.objects.filter(
+        team__registered_by=request.user
+    ).annotate(
+        user_team_count=models.Count('team')
+    ).distinct()
     
-    # Get all matches for this tournament, ordered by round
-    matches = Match.objects.filter(tournament=tournament).order_by('round_number')
+    # Get available tournaments user hasn't joined
+    available_tournaments = Tournament.objects.filter(
+        status='available'
+    ).exclude(
+        team__registered_by=request.user
+    )
 
+    # Get total teams for current user
+    user_team_count = Team.objects.filter(registered_by=request.user).count()
+
+    return render(request, 'dashboard.html', {
+        'registered_tournaments': registered_tournaments,
+        'available_tournaments': available_tournaments,
+        'user_team_count': user_team_count,
+        'debug' : False
+    })
+
+
+
+def view_tournament_bracket(request, tournament_slug):
+    tournament = get_object_or_404(Tournament, slug=tournament_slug)
+    matches = Match.objects.filter(tournament=tournament).order_by('round_number')
+    
     return render(request, 'tournament_bracket.html', {
         'tournament': tournament,
         'matches': matches,

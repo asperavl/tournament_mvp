@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ tournament.name }} Bracket</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #ffc107;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: var(--light);
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            flex: 1;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin: 0;
+            font-size: 2.2rem;
+            flex-grow: 1;
+        }
+        
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--danger);
+            color: white;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            transition: var(--transition);
+            font-weight: 600;
+            box-shadow: var(--box-shadow);
+            border: none;
+            cursor: pointer;
+            min-width: 180px;
+        }
+        
+        .back-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .back-btn i {
+            font-style: normal;
+            font-weight: 700;
+        }
+        
+        .bracket-container {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .round-container {
+            background: white;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .round-title {
+            color: var(--primary);
+            margin: 0 0 25px 0;
+            font-size: 1.5rem;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .round-title:before {
+            content: "";
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+        
+        .matches-container {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .match {
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border-left: 4px solid transparent;
+            transition: var(--transition);
+        }
+        
+        .match:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .match.winner-decided {
+            border-left-color: var(--success);
+        }
+        
+        .match-teams {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1rem;
+            position: relative;
+        }
+        
+        .team {
+            flex: 1;
+            padding: 10px 15px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+        
+        .team.winner {
+            background-color: rgba(76, 201, 240, 0.1);
+            font-weight: 600;
+            color: var(--success);
+            position: relative;
+        }
+        
+        .team.winner:after {
+            content: "★";
+            color: var(--warning);
+            margin-left: 8px;
+        }
+        
+        .vs {
+            padding: 0 20px;
+            color: var(--secondary);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .winner-display {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px dashed #ddd;
+        }
+        
+        .winner-badge {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--success);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            gap: 10px;
+        }
+        
+        .winner-badge:before {
+            content: "🏆";
+            font-size: 1.2rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: var(--secondary);
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .empty-state p {
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+        }
+        
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--secondary);
+            opacity: 0.5;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--secondary);
+            font-size: 0.9rem;
+            padding: 20px;
+            margin-top: auto;
+        }
+        
+        .footer-logo {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .header-container {
+                gap: 15px;
+            }
+            
+            .back-btn {
+                padding: 10px 15px;
+                min-width: auto;
+                width: 100%;
+            }
+            
+            .match-teams {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .vs {
+                padding: 0;
+                align-self: flex-start;
+            }
+            
+            .team {
+                width: 100%;
+            }
+            
+            .round-title {
+                font-size: 1.3rem;
+            }
+            
+            .empty-state {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-container">
+        <h1>{{ tournament.name }} Bracket</h1>
+        <a href="{% url 'dashboard' %}" class="back-btn">
+            <i>←</i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="bracket-container">
+        {% regroup matches by round_number as round_list %}
+        
+        {% for round in round_list %}
+        <div class="round-container">
+            <h3 class="round-title">
+                {% if round.grouper == 1 %}
+                    Semifinals
+                {% elif round.grouper == 2 %}
+                    Finals
+                {% else %}
+                    Round {{ round.grouper }}
+                {% endif %}
+            </h3>
+            
+            <div class="matches-container">
+                {% for match in round.list %}
+                <div class="match {% if match.winner %}winner-decided{% endif %}">
+                    <div class="match-teams">
+                        <div class="team {% if match.winner == match.team1 %}winner{% endif %}">
+                            {{ match.team1.name }}
+                            {% if match.team1_score is not None %}
+                            <span style="color: var(--secondary); font-size: 0.9em;">({{ match.team1_score }})</span>
+                            {% endif %}
+                        </div>
+                        <div class="vs">vs</div>
+                        <div class="team {% if match.winner == match.team2 %}winner{% endif %}">
+                            {{ match.team2.name }}
+                            {% if match.team2_score is not None %}
+                            <span style="color: var(--secondary); font-size: 0.9em;">({{ match.team2_score }})</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if match.winner %}
+                    <div class="winner-display">
+                        <span class="winner-badge">{{ match.winner.name }} wins!</span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <div class="empty-icon">🏟️</div>
+            <p>No matches have been scheduled for this tournament yet.</p>
+            <p>Check back later or contact the tournament organizer.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<footer>
+    <p><span class="footer-logo">TourneyMVP</span> &copy; 2025 - Simple Tournament Management</p>
+</footer>
+
+</body>
+</html>

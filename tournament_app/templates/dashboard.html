@@ -3,70 +3,360 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard</title>
+    <title>Dashboard | TourneyMVP</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #ffc107;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
         }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: #f5f7fa;
+            color: var(--dark);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f9f9f9;
-            border-radius: 8px;
+            flex: 1;
         }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .tournament-icon {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+        
+        h1, h2, h3 {
+            margin: 0;
+        }
+        
         h1 {
-            text-align: center;
+            color: var(--primary);
+            font-size: 2.2rem;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        .tournament-list {
-            list-style-type: none;
-            padding: 0;
+        
+        .brand-name {
+            color: var(--secondary);
+            font-weight: 800;
         }
-        .tournament-list li {
-            margin-bottom: 15px;
+        
+        .username-display {
+            font-size: 1.1rem;
+            color: var(--secondary);
+            font-weight: 500;
+            opacity: 0.9;
         }
-        .tournament-list a {
-            text-decoration: none;
-            color: #007bff;
-            font-size: 18px;
+        
+        .username-display::before {
+            content: "👋 ";
         }
-        .tournament-list a:hover {
-            text-decoration: underline;
+        
+        .logout-form {
+            display: inline;
         }
+        
+        .logout-btn {
+            background-color: var(--danger);
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--box-shadow);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logout-btn:hover {
+            background-color: #d3165a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
         .card {
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card h3 {
+            margin: 0 0 20px 0;
+            color: var(--primary);
+            font-size: 1.4rem;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .tournament-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .tournament-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            background: var(--light);
+            border-radius: var(--border-radius);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+        }
+        
+        .tournament-item:hover {
+            background: #e9ecef;
+            border-left-color: var(--primary);
+        }
+        
+        .tournament-info {
+            flex: 1;
+        }
+        
+        .tournament-name {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+        
+        .tournament-status {
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background: #e2e3e5;
+            color: #383d41;
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        .status-available {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-ongoing {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-completed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: var(--transition);
+            gap: 6px;
+        }
+        
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        .card h3 {
-            margin-bottom: 10px;
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
         }
 
-        /* Styling for the messages */
-        .messages {
-            margin: 10px 0;
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
         }
+        
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #6c757d;
+        }
+        
+        .empty-state p {
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+        
+        .messages {
+            margin: 20px 0;
+        }
+        
         .message {
-            padding: 10px;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            border-left: 4px solid transparent;
+        }
+        
+        .message.error {
             background-color: #f8d7da;
             color: #721c24;
-            border: 1px solid #f5c6cb;
-            border-radius: 5px;
+            border-left-color: #f5c6cb;
         }
+        
         .message.success {
             background-color: #d4edda;
             color: #155724;
-            border-color: #c3e6cb;
+            border-left-color: #c3e6cb;
+        }
+
+        .debug-info {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .logout-form {
+                align-self: flex-end;
+            }
+
+            .btn-group {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+        }
+
+        footer {
+            text-align: center;
+            color: var(--secondary);
+            font-size: 0.9rem;
+            padding: 20px;
+            margin-top: auto;
+        }
+        
+        .footer-logo {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Welcome to your Dashboard</h1>
+    <!-- Header with title and logout form -->
+    <div class="header-container">
+        <div class="header-content">
+            <div class="tournament-icon">🏆</div>
+            <h1>
+                Welcome to <span class="brand-name">TourneyMVP</span>
+                <span class="username-display">{{ request.user.username }}</span>
+            </h1>
+        </div>
+        <form class="logout-form" action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">
+                <span>Logout</span>
+            </button>
+        </form>
+    </div>
 
-    <!-- Display Messages (Error, Success, etc.) -->
+    <!-- Display Messages -->
     {% if messages %}
         <div class="messages">
             {% for message in messages %}
@@ -77,32 +367,74 @@
         </div>
     {% endif %}
 
-    <div class="card">
-        <h3>Available Tournaments</h3>
-        <ul class="tournament-list">
-            {% for tournament in available_tournaments %}
-                <li>
-                    <a href="{% url 'register_team' tournament.id %}">{{ tournament.name }}</a>
-                    <!-- Link to register for the tournament -->
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
+    <div class="dashboard-grid">
+        <!-- Registered Tournaments Section -->
+        <div class="card">
+            <h3>Your Tournaments</h3>
+            {% if registered_tournaments %}
+                <ul class="tournament-list">
+                    {% for tournament in registered_tournaments %}
+                        <li class="tournament-item">
+                            <div class="tournament-info">
+                                <div class="tournament-name">{{ tournament.name }}</div>
+                                <span class="tournament-status status-{{ tournament.status }}">
+                                    {{ tournament.get_status_display }}
+                                </span>
+                            </div>
+                            <div class="btn-group">
+                                <a href="{% url 'view_bracket' tournament.slug %}" class="btn btn-outline">
+                                    View Bracket
+                                </a>
+                                {% if debug %}
+                                <div class="debug-info">
+                                    ID: {{ tournament.id }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="empty-state">
+                    <p>You haven't registered for any tournaments yet.</p>
+                    {% if debug %}
+                    <div class="debug-info">
+                        User: {{ request.user.username }}<br>
+                        User ID: {{ request.user.id }}
+                    </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
 
-    <div class="card">
-        <h3>Your Registered Tournaments</h3>
-        <ul class="tournament-list">
-            {% for tournament in tournaments %}
-                <li>
-                    <a href="{% url 'view_tournament_bracket' tournament.id %}">{{ tournament.name }}</a>
-                    <!-- Link to view the tournament bracket -->
-                </li>
-            {% empty %}
-                <li>You have not registered for any tournaments yet.</li>
-            {% endfor %}
-        </ul>
+        <!-- Available Tournaments Section -->
+        <div class="card">
+            <h3>Available Tournaments</h3>
+            {% if available_tournaments %}
+                <ul class="tournament-list">
+                    {% for tournament in available_tournaments %}
+                        <li class="tournament-item">
+                            <div class="tournament-info">
+                                <div class="tournament-name">{{ tournament.name }}</div>
+                            </div>
+                            <a href="{% url 'register_team' tournament.slug %}" class="btn">
+                                Register
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="empty-state">
+                    <p>No tournaments are currently available for registration.</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
 </div>
+
+<footer>
+    <p><span class="footer-logo">TourneyMVP</span> &copy; 2025 - Simple Tournament Management</p>
+</footer>
 
 </body>
 </html>

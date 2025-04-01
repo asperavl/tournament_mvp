@@ -3,97 +3,333 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register Team</title>
+    <title>Register Team | TourneyMVP</title>
     <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #ffc107;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --spots-color: #3a86ff;
+            --spots-bg: #e6f0ff;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            width: 50%;
-            margin: 0 auto;
-            padding: 30px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            margin-top: 50px;
-        }
-        h2 {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
             color: #333;
-            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            flex: 1;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .tournament-icon {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+        
+        h1, h2, h3 {
+            margin: 0;
+        }
+        
+        h1 {
+            color: var(--primary);
+            font-size: 2.2rem;
+        }
+        
+        h2 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 30px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+        
+        /* Red Back Button Styles */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--danger);
+            color: white;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            transition: var(--transition);
+            font-weight: 600;
+            box-shadow: var(--box-shadow);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .back-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .back-btn i {
+            font-style: normal;
+            font-weight: 700;
+        }
+        
+        .form-container {
+            margin-top: 20px;
+        }
+        
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
+        
         .form-group label {
-            font-size: 16px;
-            margin-bottom: 8px;
             display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 1.1rem;
         }
-        .form-group input, .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
+        
+        .form-group input,
         .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: var(--light);
         }
-        button {
-            padding: 12px 20px;
-            font-size: 16px;
-            background-color: #007bff;
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+            background-color: white;
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 28px;
+            background: var(--primary);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .back-btn {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 10px 20px;
+            transition: var(--transition);
             text-decoration: none;
-            background-color: #6c757d;
-            color: white;
-            border-radius: 5px;
+            box-shadow: var(--box-shadow);
         }
-        .back-btn:hover {
-            background-color: #5a6268;
+        
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .spots-remaining {
+            color: var(--spots-color);
+            font-weight: 600;
+            background-color: var(--spots-bg);
+            padding: 10px 18px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 25px;
+            border: 1px solid rgba(58, 134, 255, 0.3);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .messages {
+            margin: 20px 0;
+        }
+        
+        .message {
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            border-left: 4px solid transparent;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left-color: #f5c6cb;
+        }
+        
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border-left-color: #c3e6cb;
+        }
+        
+        footer {
+            text-align: center;
+            color: var(--secondary);
+            font-size: 0.9rem;
+            padding: 20px;
+            margin-top: auto;
+        }
+        
+        .footer-logo {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            .back-btn {
+                padding: 10px 15px;
+                width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .spots-remaining {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>Register Team for {{ tournament.name }}</h2>
-        
-        <form method="POST">
-            {% csrf_token %}
-            
-            <div class="form-group">
-                <label for="id_name">Team Name</label>
-                {{ form.name }}
-            </div>
-            
-            <div class="form-group">
-                <label for="id_players">Players (comma separated)</label>
-                {{ form.players }}
-            </div>
-            
-            <button type="submit">Register Team</button>
-        </form>
-
-        <a href="{% url 'dashboard' %}" class="back-btn">Back to Dashboard</a>
+<div class="container">
+    <div class="header-container">
+        <div class="page-header">
+            <div class="tournament-icon">🏆</div>
+            <h1><span class="brand-name">TourneyMVP</span></h1>
+        </div>
+        <a href="{% url 'dashboard' %}" class="back-btn">
+            <i>←</i> Back to Dashboard
+        </a>
     </div>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="card">
+        <h2>Register Team for {{ tournament.name }}</h2>
+        <span class="spots-remaining">{{ spots_remaining }} spot{{ spots_remaining|pluralize }} remaining</span>
+        
+        <div class="form-container">
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="id_name">Team Name</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div class="error">{{ form.name.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_players">Players (comma separated)</label>
+                    {{ form.players }}
+                    {% if form.players.errors %}
+                        <div class="error">{{ form.players.errors }}</div>
+                    {% endif %}
+                    <small style="display: block; margin-top: 5px; color: var(--secondary);">
+                        Example: Player One, Player Two, Player Three
+                    </small>
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" class="btn">Register Team</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p><span class="footer-logo">TourneyMVP</span> &copy; 2025 - Simple Tournament Management</p>
+</footer>
 
 </body>
 </html>
