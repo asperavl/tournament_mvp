@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>{{ tournament.name }}</h2>
+    <h3>Matches:</h3>
+    <ul>
+        {% for match in matches %}
+            <li>{{ match.team1.name }} vs {{ match.team2.name }} - 
+                {% if match.score1 is not None %}{{ match.score1 }} : {{ match.score2 }}{% else %}TBD{% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
