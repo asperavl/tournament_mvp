@@ -87,7 +87,7 @@ def dashboard(request):
     })
 
 
-
+@login_required
 def view_tournament_bracket(request, tournament_slug):
     tournament = get_object_or_404(Tournament, slug=tournament_slug)
     matches = Match.objects.filter(tournament=tournament).order_by('round_number')

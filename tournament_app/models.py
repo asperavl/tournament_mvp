@@ -32,6 +32,7 @@ class Tournament(models.Model):
 class Team(models.Model):
     name = models.CharField(max_length=255)
     tournament = models.ForeignKey('Tournament', on_delete=models.CASCADE)
+    players = models.TextField(blank=True)
     registered_by = models.ForeignKey(
         User, 
         on_delete=models.CASCADE,
